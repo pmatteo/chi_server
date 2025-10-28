@@ -1,0 +1,75 @@
+name: Perform code analysis and run tests
+
+on:
+  push:
+    branches:
+      - "**" # runs on every branch push
+  pull_request:
+    types: [synchronize, opened, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  code-check:
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 1
+    steps:
+      - name: Checkout v5
+        uses: actions/checkout@v5
+
+      - name: Go setup v6
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.25
+          check-latest: true
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
+
+      - name: Run govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          install-mode: binary
+          version: latest
+          only-new-issues: true
+          working-directory: ./
+          args: --timeout=30m
+
+  tests:
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 1
+
+    strategy:
+      matrix:
+        go-version: ["1.25", "1.24", "1.23"]
+
+    steps:
+      - name: Checkout v5
+        uses: actions/checkout@v5
+
+      - name: Go setup v6
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go-version }}
+          check-latest: true
+
+      - name: Run tests
+        run: |
+          go test -v -race -buildvcs -timeout 30s -vet=off ./...

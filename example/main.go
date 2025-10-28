@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/pmatteo/chi_server"
+	"github.com/pmatteo/chiserver"
 )
 
 func main() {
@@ -15,13 +15,13 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	// Configure server
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr:   ":8080",
 		Logger: logger,
 	}
 
 	// Create server with routes
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("Hello, World!"))
 		})
@@ -32,7 +32,7 @@ func main() {
 	})
 
 	// Run with graceful shutdown on SIGINT/SIGTERM
-	ctx := chi_server.WaitForSignal()
+	ctx := chiserver.WaitForSignal()
 	if err := server.Run(ctx); err != nil {
 		logger.Error("server error", slog.String("error", err.Error()))
 		os.Exit(1)

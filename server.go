@@ -1,4 +1,4 @@
-package chi_server
+package chiserver
 
 import (
 	"context"

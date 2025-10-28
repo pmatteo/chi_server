@@ -1,4 +1,4 @@
-package chi_server_test
+package chiserver_test
 
 import (
 	"bytes"
@@ -11,13 +11,13 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/pmatteo/chi_server"
+	"github.com/pmatteo/chiserver"
 )
 
 // TestCorrelationID_GeneratesNewID tests that a new correlation ID is generated when none is provided
 func TestCorrelationID_GeneratesNewID(t *testing.T) {
-	handler := chi_server.CorrelationID(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		correlationID := chi_server.GetCorrID(r.Context())
+	handler := chiserver.CorrelationID(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		correlationID := chiserver.GetCorrID(r.Context())
 		if correlationID == "" {
 			t.Error("Expected correlation ID to be set in context, got empty string")
 		}
@@ -36,7 +36,7 @@ func TestCorrelationID_GeneratesNewID(t *testing.T) {
 	handler.ServeHTTP(w, req)
 
 	// Check response header
-	headerID := w.Header().Get(chi_server.CorrelationIDHeader)
+	headerID := w.Header().Get(chiserver.CorrelationIDHeader)
 	if headerID == "" {
 		t.Error("Expected correlation ID to be set in response header")
 	}
@@ -50,8 +50,8 @@ func TestCorrelationID_GeneratesNewID(t *testing.T) {
 func TestCorrelationID_PropagatesExistingID(t *testing.T) {
 	expectedID := "test-correlation-id-123"
 
-	handler := chi_server.CorrelationID(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		correlationID := chi_server.GetCorrID(r.Context())
+	handler := chiserver.CorrelationID(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		correlationID := chiserver.GetCorrID(r.Context())
 		if correlationID != expectedID {
 			t.Errorf("Expected correlation ID %s, got %s", expectedID, correlationID)
 		}
@@ -59,13 +59,13 @@ func TestCorrelationID_PropagatesExistingID(t *testing.T) {
 	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
-	req.Header.Set(chi_server.CorrelationIDHeader, expectedID)
+	req.Header.Set(chiserver.CorrelationIDHeader, expectedID)
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, req)
 
 	// Check response header
-	headerID := w.Header().Get(chi_server.CorrelationIDHeader)
+	headerID := w.Header().Get(chiserver.CorrelationIDHeader)
 	if headerID != expectedID {
 		t.Errorf("Expected correlation ID %s in header, got %s", expectedID, headerID)
 	}
@@ -74,14 +74,14 @@ func TestCorrelationID_PropagatesExistingID(t *testing.T) {
 // TestCorrelationID_CustomHeader tests that custom header name can be used
 func TestCorrelationID_CustomHeader(t *testing.T) {
 	// Save original and restore after test
-	originalHeader := chi_server.CorrelationIDHeader
-	defer func() { chi_server.CorrelationIDHeader = originalHeader }()
+	originalHeader := chiserver.CorrelationIDHeader
+	defer func() { chiserver.CorrelationIDHeader = originalHeader }()
 
-	chi_server.CorrelationIDHeader = "X-Custom-Request-ID"
+	chiserver.CorrelationIDHeader = "X-Custom-Request-ID"
 	expectedID := "custom-id-456"
 
-	handler := chi_server.CorrelationID(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		correlationID := chi_server.GetCorrID(r.Context())
+	handler := chiserver.CorrelationID(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		correlationID := chiserver.GetCorrID(r.Context())
 		if correlationID != expectedID {
 			t.Errorf("Expected correlation ID %s, got %s", expectedID, correlationID)
 		}
@@ -103,7 +103,7 @@ func TestCorrelationID_CustomHeader(t *testing.T) {
 // TestGetCorrID_ReturnsEmptyForMissingID tests that GetCorrID returns empty string when no ID in context
 func TestGetCorrID_ReturnsEmptyForMissingID(t *testing.T) {
 	ctx := context.Background()
-	correlationID := chi_server.GetCorrID(ctx)
+	correlationID := chiserver.GetCorrID(ctx)
 
 	if correlationID != "" {
 		t.Errorf("Expected empty string, got %s", correlationID)
@@ -112,8 +112,8 @@ func TestGetCorrID_ReturnsEmptyForMissingID(t *testing.T) {
 
 // TestGetCorrID_ReturnsEmptyForWrongType tests that GetCorrID handles wrong type in context
 func TestGetCorrID_ReturnsEmptyForWrongType(t *testing.T) {
-	ctx := context.WithValue(context.Background(), chi_server.CorrelationIDKey, 12345) // wrong type
-	correlationID := chi_server.GetCorrID(ctx)
+	ctx := context.WithValue(context.Background(), chiserver.CorrelationIDKey, 12345) // wrong type
+	correlationID := chiserver.GetCorrID(ctx)
 
 	if correlationID != "" {
 		t.Errorf("Expected empty string for wrong type, got %s", correlationID)
@@ -123,8 +123,8 @@ func TestGetCorrID_ReturnsEmptyForWrongType(t *testing.T) {
 // TestGetCorrID_ReturnsCorrectID tests that GetCorrID extracts the correct ID
 func TestGetCorrID_ReturnsCorrectID(t *testing.T) {
 	expectedID := "test-id-789"
-	ctx := context.WithValue(context.Background(), chi_server.CorrelationIDKey, expectedID)
-	correlationID := chi_server.GetCorrID(ctx)
+	ctx := context.WithValue(context.Background(), chiserver.CorrelationIDKey, expectedID)
+	correlationID := chiserver.GetCorrID(ctx)
 
 	if correlationID != expectedID {
 		t.Errorf("Expected %s, got %s", expectedID, correlationID)
@@ -143,11 +143,11 @@ func TestRequestLogger_LogsRequest(t *testing.T) {
 		w.Write([]byte("test response"))
 	})
 
-	middleware := chi_server.RequestLogger(logger)(testHandler)
+	middleware := chiserver.RequestLogger(logger)(testHandler)
 
 	req := httptest.NewRequest(http.MethodPost, "/test/path", nil)
 	// Add correlation ID to context
-	ctx := context.WithValue(req.Context(), chi_server.CorrelationIDKey, "test-corr-id")
+	ctx := context.WithValue(req.Context(), chiserver.CorrelationIDKey, "test-corr-id")
 	req = req.WithContext(ctx)
 
 	w := httptest.NewRecorder()
@@ -183,7 +183,7 @@ func TestRequestLogger_WithoutCorrelationID(t *testing.T) {
 		w.WriteHeader(http.StatusNotFound)
 	})
 
-	middleware := chi_server.RequestLogger(logger)(testHandler)
+	middleware := chiserver.RequestLogger(logger)(testHandler)
 
 	req := httptest.NewRequest(http.MethodGet, "/not-found", nil)
 	w := httptest.NewRecorder()
@@ -214,7 +214,7 @@ func TestRequestLogger_CapturesBytesWritten(t *testing.T) {
 		w.Write([]byte(responseBody))
 	})
 
-	middleware := chi_server.RequestLogger(logger)(testHandler)
+	middleware := chiserver.RequestLogger(logger)(testHandler)
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
@@ -236,20 +236,20 @@ func TestMiddlewareChain_Integration(t *testing.T) {
 	}))
 
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		corrID := chi_server.GetCorrID(r.Context())
+		corrID := chiserver.GetCorrID(r.Context())
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("correlation_id: " + corrID))
 	})
 
 	// Chain middlewares: CorrelationID -> RequestLogger -> handler
-	handler := chi_server.CorrelationID(chi_server.RequestLogger(logger)(testHandler))
+	handler := chiserver.CorrelationID(chiserver.RequestLogger(logger)(testHandler))
 
 	req := httptest.NewRequest(http.MethodGet, "/integration", nil)
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, req)
 
 	// Verify response header has correlation ID
-	corrID := w.Header().Get(chi_server.CorrelationIDHeader)
+	corrID := w.Header().Get(chiserver.CorrelationIDHeader)
 	if corrID == "" {
 		t.Error("Expected correlation ID in response header")
 	}

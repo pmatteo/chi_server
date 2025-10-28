@@ -1,4 +1,4 @@
-module github.com/pmatteo/chi_server
+module github.com/pmatteo/chiserver
 
 go 1.23
 

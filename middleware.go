@@ -1,4 +1,4 @@
-package chi_server
+package chiserver
 
 import (
 	"context"
@@ -41,7 +41,7 @@ func CorrelationID(next http.Handler) http.Handler {
 	})
 }
 
-// FromContext extracts correlation ID from context
+// GetCorrID extracts correlation ID from context
 func GetCorrID(ctx context.Context) string {
 	if val, ok := ctx.Value(CorrelationIDKey).(string); ok {
 		return val

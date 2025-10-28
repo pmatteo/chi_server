@@ -14,7 +14,7 @@ A production-ready HTTP server package built on top of [go-chi/chi](https://gith
 ## Installation
 
 ```bash
-go get your_module_path/chi_server
+go get your_module_path/chiserver
 ```
 
 ## Quick Start
@@ -26,7 +26,7 @@ import (
     "log/slog"
     "os"
     "github.com/go-chi/chi/v5"
-    "your_module_path/chi_server"
+    "your_module_path/chiserver"
 )
 
 func main() {
@@ -34,13 +34,13 @@ func main() {
     logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
     // Configure server
-    cfg := chi_server.Config{
+    cfg := chiserver.Config{
         Addr:   ":8080",
         Logger: logger,
     }
 
     // Create server with routes
-    server := chi_server.NewServer(cfg, func(r chi.Router) {
+    server := chiserver.NewServer(cfg, func(r chi.Router) {
         r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
             w.WriteHeader(http.StatusOK)
             w.Write([]byte("healthy"))
@@ -48,7 +48,7 @@ func main() {
     })
 
     // Run with graceful shutdown
-    ctx := chi_server.WaitForSignal()
+    ctx := chiserver.WaitForSignal()
     if err := server.Run(ctx); err != nil {
         logger.Error("server failed", slog.String("error", err.Error()))
         os.Exit(1)
@@ -63,12 +63,12 @@ func main() {
 The `NewServer` function creates a new HTTP server with pre-configured middlewares:
 
 ```go
-cfg := chi_server.Config{
+cfg := chiserver.Config{
     Addr:   ":8080",
     Logger: logger, // Optional: uses slog.Default() if nil
 }
 
-server := chi_server.NewServer(cfg, func(r chi.Router) {
+server := chiserver.NewServer(cfg, func(r chi.Router) {
     // Define your routes here
     r.Get("/api/users", getUsersHandler)
     r.Post("/api/users", createUserHandler)
@@ -92,7 +92,7 @@ Correlation IDs are automatically handled:
 ```go
 func handler(w http.ResponseWriter, r *http.Request) {
     // Get correlation ID from context
-    corrID := chi_server.GetCorrID(r.Context())
+    corrID := chiserver.GetCorrID(r.Context())
 
     // Use it in your logs
     slog.Info("processing request", slog.String("correlation_id", corrID))
@@ -106,7 +106,7 @@ If a client sends an `X-Correlation-ID` header, it will be propagated. Otherwise
 You can customize the correlation ID header name:
 
 ```go
-chi_server.CorrelationIDHeader = "X-Request-ID"
+chiserver.CorrelationIDHeader = "X-Request-ID"
 ```
 
 ### Graceful Shutdown
@@ -115,7 +115,7 @@ The server supports graceful shutdown with a 5-second timeout:
 
 ```go
 // Option 1: Use WaitForSignal for automatic signal handling
-ctx := chi_server.WaitForSignal()
+ctx := chiserver.WaitForSignal()
 server.Run(ctx)
 
 // Option 2: Use custom context
@@ -177,7 +177,7 @@ type RouteConfigurator func(r chi.Router)
 You can organize routes using chi's routing features:
 
 ```go
-server := chi_server.NewServer(cfg, func(r chi.Router) {
+server := chiserver.NewServer(cfg, func(r chi.Router) {
     // Group routes with common prefix
     r.Route("/api/v1", func(r chi.Router) {
         r.Get("/users", listUsers)

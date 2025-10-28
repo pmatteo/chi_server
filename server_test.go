@@ -1,4 +1,4 @@
-package chi_server_test
+package chiserver_test
 
 import (
 	"context"
@@ -12,16 +12,16 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/pmatteo/chi_server"
+	"github.com/pmatteo/chiserver"
 )
 
 // TestNewServer_WithDefaultLogger tests server creation with default logger
 func TestNewServer_WithDefaultLogger(t *testing.T) {
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr: ":8080",
 	}
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
@@ -36,12 +36,12 @@ func TestNewServer_WithDefaultLogger(t *testing.T) {
 func TestNewServer_WithCustomLogger(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr:   ":9090",
 		Logger: logger,
 	}
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
@@ -54,12 +54,12 @@ func TestNewServer_WithCustomLogger(t *testing.T) {
 
 // TestNewServer_RouteConfiguration tests that custom routes are properly configured
 func TestNewServer_RouteConfiguration(t *testing.T) {
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr:   ":0", // Use dynamic port
 		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/custom", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("custom route"))
@@ -89,12 +89,12 @@ func TestNewServer_RouteConfiguration(t *testing.T) {
 
 // TestServer_Run_ContextCancellation tests graceful shutdown on context cancellation
 func TestServer_Run_ContextCancellation(t *testing.T) {
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr:   ":0", // Dynamic port to avoid conflicts
 		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
@@ -124,12 +124,12 @@ func TestServer_Run_ContextCancellation(t *testing.T) {
 
 // TestServer_Run_ImmediateCancellation tests shutdown when context is already cancelled
 func TestServer_Run_ImmediateCancellation(t *testing.T) {
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr:   ":0",
 		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
@@ -155,12 +155,12 @@ func TestServer_Run_ImmediateCancellation(t *testing.T) {
 
 // TestServer_Run_InvalidAddress tests server with invalid address
 func TestServer_Run_InvalidAddress(t *testing.T) {
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr:   "invalid:address:format",
 		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
@@ -177,12 +177,12 @@ func TestServer_Run_InvalidAddress(t *testing.T) {
 
 // TestServer_MultipleRoutes tests server with multiple route configurations
 func TestServer_MultipleRoutes(t *testing.T) {
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr:   ":0",
 		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("healthy"))
@@ -203,7 +203,7 @@ func TestServer_MultipleRoutes(t *testing.T) {
 
 // TestWaitForSignal_ContextCancellation tests WaitForSignal context cancellation
 func TestWaitForSignal_ContextCancellation(t *testing.T) {
-	ctx := chi_server.WaitForSignal()
+	ctx := chiserver.WaitForSignal()
 
 	// Verify context is not cancelled initially
 	select {
@@ -232,7 +232,7 @@ func TestWaitForSignal_ContextCancellation(t *testing.T) {
 
 // TestWaitForSignal_SIGTERMSignal tests WaitForSignal with SIGTERM
 func TestWaitForSignal_SIGTERMSignal(t *testing.T) {
-	ctx := chi_server.WaitForSignal()
+	ctx := chiserver.WaitForSignal()
 
 	// Send SIGTERM signal in goroutine
 	go func() {
@@ -252,12 +252,12 @@ func TestWaitForSignal_SIGTERMSignal(t *testing.T) {
 
 // TestServer_Integration tests full server lifecycle
 func TestServer_Integration(t *testing.T) {
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr:   ":0",
 		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("pong"))
@@ -291,12 +291,12 @@ func TestServer_Integration(t *testing.T) {
 
 // TestServer_ShutdownTimeout tests that shutdown respects timeout
 func TestServer_ShutdownTimeout(t *testing.T) {
-	cfg := chi_server.Config{
+	cfg := chiserver.Config{
 		Addr:   ":0",
 		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 	}
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/slow", func(w http.ResponseWriter, r *http.Request) {
 			// Simulate slow handler
 			time.Sleep(10 * time.Second)
@@ -329,9 +329,9 @@ func TestServer_ShutdownTimeout(t *testing.T) {
 
 // TestConfig_DefaultValues tests Config with default/zero values
 func TestConfig_DefaultValues(t *testing.T) {
-	cfg := chi_server.Config{} // Empty config
+	cfg := chiserver.Config{} // Empty config
 
-	server := chi_server.NewServer(cfg, func(r chi.Router) {
+	server := chiserver.NewServer(cfg, func(r chi.Router) {
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})

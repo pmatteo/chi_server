@@ -1,9 +1,6 @@
 name: Perform code analysis and run tests
 
 on:
-  push:
-    branches:
-      - "**" # runs on every branch push
   pull_request:
     types: [synchronize, opened, reopened, ready_for_review]
 
@@ -43,7 +40,7 @@ jobs:
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
           install-mode: binary
           version: latest

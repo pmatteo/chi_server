@@ -14,7 +14,7 @@ A production-ready HTTP server package built on top of [go-chi/chi](https://gith
 ## Installation
 
 ```bash
-go get your_module_path/chiserver
+go get github.com/pmatteo/chiserver
 ```
 
 ## Quick Start
@@ -26,7 +26,7 @@ import (
     "log/slog"
     "os"
     "github.com/go-chi/chi/v5"
-    "your_module_path/chiserver"
+    "github.com/pmatteo/chiserver"
 )
 
 func main() {

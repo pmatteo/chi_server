@@ -1,4 +1,4 @@
-module github.com/pmatteo/chiserver_example
+module github.com/pmatteo/chi_server_example
 
 go 1.25
 
@@ -9,4 +9,4 @@ require (
 
 require github.com/google/uuid v1.6.0 // indirect
 
-replace github.com/pmatteo/chiserver => ../
+replace github.com/pmatteo/chi_server => ../

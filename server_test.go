@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/pmatteo/chiserver"
+	"github.com/pmatteo/chi_server"
 )
 
 // TestNewServer_WithDefaultLogger tests server creation with default logger

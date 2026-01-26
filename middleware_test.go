@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/pmatteo/chiserver"
+	"github.com/pmatteo/chi_server"
 )
 
 // TestCorrelationID_GeneratesNewID tests that a new correlation ID is generated when none is provided

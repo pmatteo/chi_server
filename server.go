@@ -40,7 +40,7 @@ func NewServer(cfg Config, configureRoutes RouteConfigurator) *Server {
 	// Common middlewares
 	r.Use(middleware.RequestID)
 	r.Use(CorrelationID)
-	r.Use(middleware.RealIP)
+	r.Use(middleware.ClientIPFromXFFTrustedProxies(1))
 	r.Use(middleware.Recoverer)
 	r.Use(RequestLogger(cfg.Logger))
 

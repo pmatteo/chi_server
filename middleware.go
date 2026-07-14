@@ -62,7 +62,7 @@ func RequestLogger(logger *slog.Logger) func(next http.Handler) http.Handler {
 				slog.String("path", r.URL.Path),
 				slog.Int("status", ww.Status()),
 				slog.Int("bytes", ww.BytesWritten()),
-				slog.String("remote", r.RemoteAddr),
+				slog.String("remote", middleware.GetClientIP(r.Context())),
 				slog.String("correlation_id", GetCorrID(r.Context())),
 				slog.Duration("duration", time.Since(start)),
 			)

@@ -3,7 +3,7 @@ module github.com/pmatteo/chi_server_example
 go 1.25
 
 require (
-	github.com/go-chi/chi/v5 v5.2.5
+	github.com/go-chi/chi/v5 v5.4.0
 	github.com/pmatteo/chi_server v0.5.0
 )
 
